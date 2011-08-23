@@ -9034,12 +9034,31 @@ insertions.
 
 <script>
 
+window.activeCommentBox = null;
+document.body.onclick = function(e) {
+  if (window.activeCommentBox &&
+      window.activeCommentBox != e.target &&
+      e.target.localName.toLowerCase() != "button") {
+    onClickHandler(window.activeCommentBox)();
+  }
+};
+
+function onClickHandler(node) {
+  return function() {
+    if (node.nodeType != node.ELEMENT_NODE ||
+        node.className.indexOf("comments") == -1) {
+      return;
+    }
+    var isCollapsed = node.className == "comments";
+    node.className = isCollapsed ? "comments-expanded" : "comments";
+    window.activeCommentBox = isCollapsed ? node : null;
+  };
+}
+
 [].forEach.call(document.querySelectorAll(".comments"), function(node) {
   var button = document.createElement("button");
   button.textContent = "View comments";
-  button.onclick = function() {
-    node.className = node.className == "comments" ? "comments-expanded" : "comments";
-  };
+  button.onclick = onClickHandler(node);
 
   var wrapper = document.createElement("div");
   wrapper.className = "comments-wrapper";
